@@ -22,6 +22,15 @@
   - Elektrisk diagram
   - Flowchart
   - Opgaven skal være præcist beskrevet
+## Specks for DC-motor
+working v 12 <br>
+normal v 12 <br>
+free run speed at 12 v 130 rpm/ 250rpm <br>
+stack torque at 12v 20Kg/8,8Kg <br>
+redactor size 23mm  <br>
+length 6mm  <br>
+shaft 4mm <br>
+weight 60g <br>
 
 ## H-bro
 Der skal meget strøm (og stor energi) til at drive en elektrisk motor. En del mere end de 5mA vores controller kan levere.
