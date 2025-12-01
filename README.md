@@ -67,6 +67,8 @@ L298N Module Pinout Configuration
 |Heatsink for better performance
 |Power-On LED indicator
 
+<img width="750" height="500" alt="image" src="https://github.com/user-attachments/assets/527074fe-625e-4e02-9b99-26912e505805" />
+
 Website with further information: https://components101.com/modules/l293n-motor-driver-module
 
 
