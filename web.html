@@ -1,0 +1,85 @@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
+     integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+    <style>
+        html {
+            font-family: Arial;
+            display: inline-block;
+            margin: 0px auto;
+            text-align: center;
+        }
+
+        .button {
+            background-color: #ce1b0e;
+            border: none;
+            color: rgb(255, 255, 255);
+            padding: 16px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 24px;
+            margin: 4px 6px;
+            cursor: pointer;
+        }
+
+        .button1 {
+            background-color: #d4ff00;
+        }
+
+        .button2 {
+            background-color: #00ff15;
+        }
+
+        .button3 {
+            background-color: #1d1c1d;
+        }
+
+        .button4 {
+        background-color: #ffff40;
+        }
+
+    </style>
+</head>
+
+<body>
+    <h2>Nothing too special!</h2>
+    <p>Last used button: <strong>""" + led_state + """</strong></p>
+    <p>
+        <i class="fas fa-lightbulb fa-3x" style="color:#c81919;"></i>
+        <a href=\"red_led_on\"><button class="button">RED LED ON</button></a>
+    </p>
+    <p>
+        <i class="fas fa-lightbulb fa-3x" style="color:#f6ff00;"></i>
+        <a href=\"yellow_led_on\"><button class="button button1">YELLOW LED ON</button></a>
+    </p>
+    <p>
+        <i class="fas fa-lightbulb fa-3x" style="color:#00ff15;"></i>
+        <a href=\"green_led_on\"><button class="button button2">GREEN LED ON</button></a>
+    </p>
+    <p>
+        <i class="far fa-lightbulb fa-3x" style="color:#1d1c1d;"></i>
+        <a href=\"all_off\"><button class="button button3">ALL OFF</button></a>
+    </p>
+    <p>
+        <i class="fa fa-rocket fa-3x" style="color:#1d1c1d;"></i>
+        <a href=\"count_down\"><button class="button button4">COUNT DOWN</button></a>
+    </p>
+    <form>
+        <label for="Username" style="margin-right: 48px;">Enter Username:</label><br>
+        <input type="text" id="Username" name="Username"><br>
+        <label for="Password" style="margin-right: 54px;">Enter Password:</label><br>
+        <input type="password" id="Password" name="Password"><br>
+        <input type="submit" style="margin-top: 10px; margin-right: 115px;"> 
+
+    </form>
+    
+    <form>
+        <label for="compiler" style="margin-left: 8px;"> Do you have compiler</label>
+        <input type="checkbox" id="compiler" name="do you" value="compiler">
+    </form>
+    
+</body>
+
+</html>
