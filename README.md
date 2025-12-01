@@ -35,6 +35,41 @@ weight 60g <br>
 ## H-bro
 Der skal meget strøm (og stor energi) til at drive en elektrisk motor. En del mere end de 5mA vores controller kan levere.
 
+## L298 specks
+
+L298N Module Pinout Configuration
+|Pin Name|Description
+|:---|:---
+|IN1 & IN2|Motor A input pins. Used to control the spinning direction of Motor A
+|IN3 & IN4|Motor B input pins. Used to control the spinning direction of Motor B
+|ENA|Enables PWM signal for Motor A
+|ENB|Enables PWM signal for Motor B
+|OUT1 & OUT2|Output pins of Motor A
+|OUT3 & OUT4|Output pins of Motor B
+|12V|12V input from DC power Source
+|5V|Supplies power for the switching logic circuitry inside L298N IC
+|GND|Ground pin
+
+ 
+
+|Features|Specifications
+|:---|:---
+|Driver Model| L298N 2A
+|Driver Chip| Double H Bridge L298N
+|Motor Supply Voltage (Maximum)| 46V
+|Motor Supply Current (Maximum)| 2A
+|Logic Voltage| 5V
+|Driver Voltage| 5-35V
+|Driver Current|2A
+|Logical Current|0-36mA
+|Maximum Power (W)| 25W
+|Current Sense for each motor
+|Heatsink for better performance
+|Power-On LED indicator
+
+Website with further information: https://components101.com/modules/l293n-motor-driver-module
+
+
 Vi skal bruge en DC motor, som er gearet til at skrue ned for hastigheden og op for momentet.
 
 |       Variable       |   Værdi    |
