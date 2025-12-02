@@ -1,6 +1,6 @@
 # src/motor/movement
 from .motor import *
-
+from meserments.main import floors
 
 def get_current_floor():
     """
@@ -8,7 +8,12 @@ def get_current_floor():
     :return:
     :rtype:
     """
-    pass
+    stops = floors()
+    cur_dist = measure()
+    for floor, dist in stops.items():
+        if abs(cur_dist - dist) <= ACCURACY:
+            return floor
+    raise ValueError("Could not determine the current floor")
 
 def go_to_floor(floor:int):
     pass

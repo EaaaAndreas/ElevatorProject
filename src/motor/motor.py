@@ -1,11 +1,12 @@
 from machine import Pin, PWM
 from time import sleep
-from .tof import messure
+from .tof import measure
 
 UP = 1 # These decide the direction of the motor. Swap them to go the other way.
 DOWN = 2
 
 ACCURACY = 3 # mm - How precise the elevator has to be when parking
+SLOW = 400 # How long before the designated floor does the elevator need to stop slowing down
 
 motorUp = Pin(18, Pin.OUT)
 motorDown = Pin(19, Pin.OUT)
@@ -47,7 +48,7 @@ def motor_stop() -> None:
     motor_PWM.duty_u16(0)
 
 
-def moveTo(destination) -> None:
+def move_to(destination) -> None:
     """
     Moves the elevator to the specified distance
     :param destination: The defined
@@ -55,70 +56,76 @@ def moveTo(destination) -> None:
     :return:
     :rtype:
     """
-    where_i_am = messure()
+    where_i_am = measure()
     if where_i_am < destination:
-        v = 1
-        goingUp(destination, where_i_am, v)
+        go_up(destination)
     elif where_i_am > destination:
-        v = 2
-        goingDown(destination, where_i_am, v)
+        go_down(destination)
+    # If we have doors: Make 'else: open doors'
         
         
-def rampUp(speed, v):
-    if v == 1:
+def ramp_up(speed:int, direction:int) -> int:
+    if direction == 1:
         if speed > 65336:
-            
             sleep(0.005)
             speed += duty_step
-            return speed
-    if v == 2:
+    elif direction == 2:
         if speed > 65336:
-            
             sleep(0.005)
             speed += duty_step
-            return(speed)
+    else:
+        raise ValueError("direction must be 1 or 2")
+    return speed
 
         
-def rampDown(speed, v):
-    if v == 1:      
+def ramp_down(speed:int, direction:int) -> int:
+    """
+    Calculates a new PWM duty cycle for ramping down the motors movement
+    :param speed: The current PWM duty cycle
+    :type speed: int
+    :param direction: The direction of the motor
+    :type direction: int
+    :return: The new PWM value
+    :rtype: int
+    """
+    if direction == 1:
         if speed < 65336:
-            
             sleep(0.005)  
             speed += duty_step
-            return speed
-    if v == 2:
+    elif direction == 2:
         if speed < 65336:
-            
             sleep(0.005) 
             speed += duty_step
-            return speed
+    else:
+        raise ValueError("direction must be 1 or 2")
+    return speed # The speed will stay constant if max speed is reached
     
-def go_up(destination:int, where_i_am:float) -> None:
+def go_up(destination:int) -> None:
     """
     Makes the elevator go UP to a specified floor
     :param destination: Where the elevator needs to go
     :type destination: int
-    :param where_i_am: Where the elevator currently is (readout from ToF sensor)
-    :type where_i_am: float
-    :param v: ???
-    :type v: int
     :return: None
     """
     speed = 0
-    while where_i_am < destination + accuracy:
-        speed = rampUp(speed, 1)
-        where_i_am = messure()
-        
-    while where_i_am < destination:                
-        speed = rampDown(speed, 2)
-        where_i_am = messure()    
+    while measure() < destination + ACCURACY:
+        # Removed redundant assignment of "where_i_am" variable. Moved directly to 'while' statement.
+        speed = ramp_up(speed, UP) # Make the motor move
 
-def goingDown(destination:int, where_i_am:float, v:int) -> None:
+    while measure() < destination:
+        speed = ramp_down(speed, DOWN)
+
+def go_down(destination:int) -> None:
+    """
+        Makes the elevator go DOWN to a specified floor
+        :param destination: Where the elevator needs to go
+        :type destination: int
+        :return: None
+    """
     speed = 0
-    while where_i_am > destination - accuracy:
-        speed = rampUp(speed, v)
-        where_i_am = messure()
-    while where_i_am > destination:    
-        speed = rampDown(speed, v)
-        where_i_am = messure()
+    while measure() > destination - ACCURACY:
+        speed = ramp_up(speed, DOWN)
+
+    while measure() > destination:
+        speed = ramp_down(speed, UP)
 

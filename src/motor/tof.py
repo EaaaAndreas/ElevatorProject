@@ -5,7 +5,7 @@ from machine import Pin
 
 gy53 = Pin(16, Pin.IN) # Initialize GY-53 I2C pin
 
-def messure(readout = False):
+def measure(readout = False):
     while gy53.value() == True: # Wait for the GY-53 to become ready
         #print("Waiting for GY-53 to become ready...")
         pass
