@@ -13,7 +13,12 @@ gc.collect()
 
 # Set pins
 
-
+"""
+Jeg har lavet en placeholder, så du kan kalde:
+```
+from .motor import *
+go_to_floor(x) # Flytter elevatoren til "x" etage.
+"""
 
 # handles network connection 
 ssid = 'ITEK 1st'
