@@ -1,6 +1,9 @@
 from machine import Pin, PWM
 from time import sleep
 from .tof import measure
+from measurements.main import get_floor
+from main.sevensegment import show_number
+from motor.movement import update_display
 
 UP = 1 # These decide the direction of the motor. Swap them to go the other way.
 DOWN = 2
@@ -111,9 +114,11 @@ def go_up(destination:int) -> None:
     while measure() < destination + ACCURACY:
         # Removed redundant assignment of "where_i_am" variable. Moved directly to 'while' statement.
         speed = ramp_up(speed, UP) # Make the motor move
+        update_display()
 
     while measure() < destination:
         speed = ramp_down(speed, DOWN)
+        update_display()
 
 def go_down(destination:int) -> None:
     """
@@ -125,7 +130,9 @@ def go_down(destination:int) -> None:
     speed = 0
     while measure() > destination - ACCURACY:
         speed = ramp_up(speed, DOWN)
+        update_display()
 
     while measure() > destination:
         speed = ramp_down(speed, UP)
+        update_display()
 

@@ -2,7 +2,7 @@ import random
 import json
 import os
 
-def messure() -> int:
+def measure() -> int:
     return random.randint(0, 10000)
 
 def saving(etage, distance):
@@ -13,12 +13,12 @@ def saving(etage, distance):
         data = {}
     data.update({etage: distance})
 
-    with open('data.json', 'w') as f:
-        json.dump(data, f, indent=4)
+    with open('./data.json', 'w') as f:
+        json.dump(data, f)
 
 def floor():
     try:
-        with open("data.json", "r") as f:
+        with open("./data.json", "r") as f:
             data = json.load(f)
             return data
     except FileNotFoundError:
@@ -40,16 +40,20 @@ def get_floor(etage) -> int:
     # raise error when no data.json file
     return distance
 
-def main():
+def closest_floor(dist) -> int:
+    floors = floor()
+    return floors
+def calibrate():
     while True:
-        etage = input('Etage du vil på: ')
-        distence = messure()
-        saving(etage, distence)
+        etage = input('Skriv etage nr.: ')
+        distance = measure()
+        saving(etage, distance)
         print('data saved')
         print('floor you are on')
         for etage, distance in floor().items():
             print(f"{etage}: {distance}")
         
-main()
+if __name__ == '__main__':
+    calibrate()
 
 
