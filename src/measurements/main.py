@@ -14,7 +14,7 @@ def saving(etage, distance):
     data.update({etage: distance})
 
     with open('./data.json', 'w') as f:
-        json.dump(data, f, indent=4)
+        json.dump(data, f)
 
 def floor():
     try:
