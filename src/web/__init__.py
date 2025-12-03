@@ -1,10 +1,5 @@
 # src/web/__init__.py
-"""
-Author: Andreas S. Niebuhr
-Email: andreas.niebuhr04@gmail.com
-GitHub: https://github.com/N1ebuhr
-Creation: 03-12-2025
+from .picoweb import *
+from .main import *
 
-Description:
-    $END$
-"""
+__all__ = ["create_server", "check_requests", "stop_server", "disconnect_wifi"]
