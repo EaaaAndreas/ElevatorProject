@@ -1,7 +1,7 @@
 # src/motor/movement
 from .motor import *
 from measurements.main import floor
-
+from main.sevensegment import *
 
 def get_current_floor():
     """
@@ -15,6 +15,13 @@ def get_current_floor():
         if abs(cur_dist - dist) <= ACCURACY:
             return fl
     raise ValueError("Could not determine the current floor")
+
+
+def update_display():
+    curr = get_current_floor()
+    if CURRENT_NUMBER != curr:
+        show_number(curr)
+
 
 def go_to_floor(fl:int):
     curr = get_current_floor()
