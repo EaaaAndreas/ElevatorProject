@@ -17,7 +17,7 @@ PASSWORD = 'itekf25v'
 PORT = 80
 
 # Callback function - will be set by main.py
-command_callback = None
+command_callback = {}
 
 def init_wifi(ssid=None, password=None):
     """
@@ -71,12 +71,17 @@ def is_wifi_connected():
 def set_command_callback(callback):
     """
     Set the callback function to handle elevator commands
-    Callback should accept (command, value) parameters
-    Example: callback('goto_floor', 3) or callback('stop', None)
+    Callback should accept (command, *values) parameters
+    Example: callback('goto_floor_3', function, 3) or callback('stop', None)
     """
     global command_callback
-    command_callback = callback
+    name, fn, *values = callback
+    command_callback.update({name: (fn,values)})
     print('[Web Server] Command callback registered')
+
+def get_command_callback(name):
+    callback = command_callback.get(name)
+    return callback[0](*callback[1])
 
 def generate_webpage(current_floor="Unknown", status="Ready"):
     """Generate the HTML page with current elevator state"""
@@ -179,7 +184,7 @@ def generate_webpage(current_floor="Unknown", status="Ready"):
         
         <button class="emergency" onclick="location.href='/?cmd=stop'">EMERGENCY STOP</button>
         
-        <div class="footer">Auto-refresh: 5s | IP: {ip_address}</div>
+        <div class="footer">Auto-refresh: 1s | IP: {ip_address}</div>
     </div>
 </body>
 </html>"""
@@ -201,8 +206,7 @@ def start_server():
         server_socket = socket.socket()
         server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server_socket.bind(addr)
-        server_socket.listen(1)
-        server_socket.setblocking(False)  # Non-blocking mode
+        server_socket.listen()
         
         print(f'[Web Server] Listening on {ip_address}:{PORT}')
         print(f'[Web Server] Access at: http://{ip_address}')
@@ -225,49 +229,52 @@ def check_requests(current_floor="Unknown", status="Ready"):
     """
     if not server_socket:
         return
-    
+    cl = None
     try:
         cl, addr = server_socket.accept()
         # print(f'[Web Server] Client connected: {addr}')
-        
-        request = cl.recv(1024)
-        request_str = str(request)
-        
-        # Parse the request
-        command_issued = False
-        
-        if '/?floor=1' in request_str:
-            if command_callback:
-                command_callback('goto_floor', 1)
-            command_issued = True
-        elif '/?floor=2' in request_str:
-            if command_callback:
-                command_callback('goto_floor', 2)
-            command_issued = True
-        elif '/?floor=3' in request_str:
-            if command_callback:
-                command_callback('goto_floor', 3)
-            command_issued = True
-        elif '/?floor=4' in request_str:
-            if command_callback:
-                command_callback('goto_floor', 4)
-            command_issued = True
-        elif '/?cmd=stop' in request_str:
-            if command_callback:
-                command_callback('stop', None)
-            command_issued = True
-        
+        try:
+            request = cl.recv(1024)
+            request_str = str(request)
+
+            # Parse the request
+            command_issued = False
+            if '/?floor=1' in request_str:
+                if command_callback:
+                    get_command_callback("goto_1")
+                    print("Commanded to change to floor 1")
+                command_issued = True
+            elif '/?floor=2' in request_str:
+                if command_callback:
+                    get_command_callback('goto_2')
+                    print("Commanded to change to floor 2")
+                command_issued = True
+            elif '/?floor=3' in request_str:
+                if command_callback:
+                    get_command_callback('goto_3')
+                    print("Commanded to change to floor 3")
+                command_issued = True
+            elif '/?floor=4' in request_str:
+                if command_callback:
+                    get_command_callback('goto_4')
+                    print("Commanded to change to floor 4")
+                command_issued = True
+            elif '/?cmd=stop' in request_str:
+                if command_callback:
+                    get_command_callback('stop')
+                command_issued = True
+        except OSError:
+            pass
         # Generate and send response
         response = generate_webpage(str(current_floor), status)
-        cl.send('HTTP/1.1 200 OK\r\n')
-        cl.send('Content-Type: text/html\r\n')
-        cl.send('Connection: close\r\n\r\n')
-        cl.sendall(response)
+        cl.send('HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n')
+        cl.send(response)
         cl.close()
         
-    except OSError:
+    except OSError as e:
         # No incoming connection (non-blocking)
-        pass
+        if cl:
+            cl.close()
     except Exception as e:
         print(f'[Web Server] Error handling request: {e}')
 

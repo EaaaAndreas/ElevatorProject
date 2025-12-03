@@ -1,10 +1,7 @@
 from machine import Pin, PWM
 from time import sleep
 from .tof import measure
-from measurements.main import get_floor
-from main.sevensegment import show_number
 from motor.movement import update_display
-
 UP = 1 # These decide the direction of the motor. Swap them to go the other way.
 DOWN = 2
 
