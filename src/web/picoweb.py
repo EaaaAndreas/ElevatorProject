@@ -10,7 +10,7 @@ wlan = None
 server_socket = None
 is_connected = False
 ip_address = None
-
+AUTOREFRESH = 2 # seconds
 # Configuration
 SSID = 'ITEK 1st'
 PASSWORD = 'itekf25v'
@@ -91,7 +91,7 @@ def generate_webpage(current_floor="Unknown", status="Ready"):
     <meta charset="UTF-8">
     <title>Elevator Control</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="refresh" content="5">
+    <meta http-equiv="refresh" content="{AUTOREFRESH}">
     <style>
         body {{
             font-family: Arial, sans-serif;
@@ -184,7 +184,7 @@ def generate_webpage(current_floor="Unknown", status="Ready"):
         
         <button class="emergency" onclick="location.href='/?cmd=stop'">EMERGENCY STOP</button>
         
-        <div class="footer">Auto-refresh: 1s | IP: {ip_address}</div>
+        <div class="footer">Auto-refresh: {AUTOREFRESH}s | IP: {ip_address}</div>
     </div>
 </body>
 </html>"""
@@ -239,22 +239,23 @@ def check_requests(current_floor="Unknown", status="Ready"):
 
             # Parse the request
             command_issued = False
-            if '/?floor=1' in request_str:
+            if '/?floor=1' in request_str and current_floor != 1:
+                # TODO: Kan vi måske ændre refresh rate hér, så den refresher ofte, når vi kører, og sjældent/aldrig, når vi er stationære?
                 if command_callback:
                     get_command_callback("goto_1")
                     print("Commanded to change to floor 1")
                 command_issued = True
-            elif '/?floor=2' in request_str:
+            elif '/?floor=2' in request_str and current_floor != 2:
                 if command_callback:
                     get_command_callback('goto_2')
                     print("Commanded to change to floor 2")
                 command_issued = True
-            elif '/?floor=3' in request_str:
+            elif '/?floor=3' in request_str and current_floor != 3:
                 if command_callback:
                     get_command_callback('goto_3')
                     print("Commanded to change to floor 3")
                 command_issued = True
-            elif '/?floor=4' in request_str:
+            elif '/?floor=4' in request_str and current_floor != 4:
                 if command_callback:
                     get_command_callback('goto_4')
                     print("Commanded to change to floor 4")

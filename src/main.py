@@ -1,6 +1,7 @@
 from web import *
 from web.picoweb import set_command_callback
 from time import sleep_ms
+print("Ready")
 current_floor = 1
 
 def change_floor(fl:int): # TODO: remove test-function

@@ -5,8 +5,9 @@ from time import sleep
 
 
 def create_server():
-    while not init_wifi():
-        sleep(5)
+    if not is_wifi_connected():
+        while not init_wifi():
+            sleep(5)
     """set_command_callback(('goto_1', go_to_floor, 1))
     set_command_callback(('goto_2', go_to_floor, 2))
     set_command_callback(('goto_3', go_to_floor, 3))
