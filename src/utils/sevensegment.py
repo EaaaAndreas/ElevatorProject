@@ -1,5 +1,6 @@
 # src/main/sevensegment
 from machine import Pin
+from measurements.main import get_current_floor
 
 CURRENT_NUMBER = None
 
@@ -35,6 +36,7 @@ def show_number(n:int):
     :return: None
     """
     global CURRENT_NUMBER
+    n = int(n)
     if 0 <= n <= 9:
         CURRENT_NUMBER = n
         for key, value in numbers[n].items():
@@ -47,3 +49,12 @@ def clear_display():
     CURRENT_NUMBER = None
     for pin in pins.values():
         pin.off()
+
+
+def update_display():
+    print("Updating display...")
+    curr = get_current_floor()
+    print(curr)
+    if CURRENT_NUMBER != curr:
+        show_number(curr)
+        print(curr)

@@ -1,28 +1,50 @@
-from web import *
-from web.picoweb import set_command_callback
+# src/main
 from time import sleep_ms
-print("Ready")
+
+from motor import go_to_floor
+from web.main import create_server
+from web.picoweb import check_requests, stop_server, disconnect_wifi
+from utils.sevensegment import update_display
+
 current_floor = 1
+def init():
+    while True:
+        print("Type 'run' to run elevator program")
+        sleep_ms(50)
+        print("Type 'cal' to calibrate elevator")
+        sleep_ms(50)
+        print("Type 'wrp' to setup webrepl")
+        inp = input().strip().lower()
 
-def change_floor(fl:int): # TODO: remove test-function
-    global current_floor
-    print("Changing to floor", fl)
-    current_floor = fl
+        if inp == "run":
+            return run_elevator()
+        elif inp == "cal":
+            print("Calibration not implemented yet")
+        elif inp == "wrp":
+            import webrepl_setup
+        else:
+            print("Invalid input")
 
-
-set_command_callback(("goto_1", change_floor, 1))
-set_command_callback(("goto_2", change_floor, 2))
-set_command_callback(("goto_3", change_floor, 3))
-set_command_callback(("goto_4", change_floor, 4))
-set_command_callback(("stop", print, "stopped"))
-
-def main():
-    create_server()
+# TODO: Make work with motor
+def run_elevator():
+    sleep_ms(50)
+    print("Updating display")
+    update_display()
+    print("Starting loop")
+    while True:
+        print("What floor?")
+        inp = int(input().strip())
+        if 0 < inp <= 4:
+            go_to_floor(inp)
+        else:
+            print("Floor", inp, "does not exist.")
+    """create_server()
     try:
         while True:
             check_requests(current_floor)
     finally:
         stop_server()
-        disconnect_wifi()
+        disconnect_wifi()"""
 
-main()
+
+init()

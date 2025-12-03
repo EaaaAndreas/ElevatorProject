@@ -5,6 +5,13 @@ import network
 import socket
 import time
 
+# TODO: How do we update the current floor? Currently we go to '/floor=n' when the user calls for the elevator. But
+#   this doesn't fathom the movement of the elevator. Maybe we could make it '/floor=n+current=m', along with a
+#   `update_floor` function to just updating the current floor, without having to check for calls.
+
+
+
+
 # Module state variables
 wlan = None
 server_socket = None
@@ -38,7 +45,7 @@ def init_wifi(ssid=None, password=None):
     if not wlan.isconnected():
         print(f'[WiFi] Connecting to {SSID}...')
         wlan.connect(SSID, PASSWORD)
-        
+        print(wlan)
         # Wait for connection (10 second timeout)
         max_wait = 10
         while max_wait > 0:
@@ -227,6 +234,10 @@ def check_requests(current_floor="Unknown", status="Ready"):
     Returns:
         None
     """
+    # FIXME: The current solution does not allow the user to press multiple floors at once. We might have to add a
+    #   'queue' function to handle multiple selections.
+    # TODO: When the 'queue' is implemented, we also need some logic to figure out, the order that the floors are
+    #   visited in. - Also, would be cool if the buttons stay pressed until the floor has been left.
     if not server_socket:
         return
     cl = None
@@ -236,7 +247,7 @@ def check_requests(current_floor="Unknown", status="Ready"):
         try:
             request = cl.recv(1024)
             request_str = str(request)
-
+            print("handling request:", request)
             # Parse the request
             command_issued = False
             if '/?floor=1' in request_str and current_floor != 1:
@@ -276,8 +287,10 @@ def check_requests(current_floor="Unknown", status="Ready"):
         # No incoming connection (non-blocking)
         if cl:
             cl.close()
+        print(e)
     except Exception as e:
         print(f'[Web Server] Error handling request: {e}')
+        raise e
 
 def stop_server():
     """Stop the web server and close socket"""

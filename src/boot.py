@@ -1,18 +1,20 @@
 # src/boot.py
 from web.picoweb import init_wifi, disconnect_wifi, is_wifi_connected
-from time import sleep, sleep_ms
+from time import sleep, sleep_ms, ticks_ms, ticks_diff
 from machine import Pin
 import webrepl
 
 # Board led for on status
 led = Pin("LED", Pin.OUT, value=1)
+print("Initializing...")
 
 #Connect to WiFi
 try:
-    while not init_wifi():
+    timer = ticks_ms()
+    while not init_wifi("HoloNet", "C-3PO_BabyYoda") and ticks_diff(timer, ticks_ms()) < 3.e4:
         led.toggle()
         sleep(5)
-except:
+except OSError:
     if is_wifi_connected():
         disconnect_wifi()
 
