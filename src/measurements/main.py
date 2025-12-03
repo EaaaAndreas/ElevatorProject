@@ -25,7 +25,18 @@ def floor():
         print("No data.json file found yet.")
 
 def get_floor(etage) -> int:
-    distance = ...
+    try:
+        with open('data.json', 'r') as file:
+            data = json.load(file)
+
+        if etage in data:
+            return data[etage]
+        else:
+            raise KeyError(f"Etage {etage} not found in data.json")
+
+    except FileNotFoundError:
+        raise FileNotFoundError("No data.json file found yet.")
+
     # raise error when no data.json file
     return distance
 
@@ -38,7 +49,7 @@ def calibrate():
         distance = measure()
         saving(etage, distance)
         print('data saved')
-        print('floor er are on')
+        print('floor you are on')
         for etage, distance in floor().items():
             print(f"{etage}: {distance}")
         
