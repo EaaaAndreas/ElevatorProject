@@ -2,6 +2,7 @@
 from .motor import *
 from measurements.main import floor
 
+
 def get_current_floor():
     """
     Returns the current floor of the elevator (Only if the elevator is parked at a certain floor).
@@ -16,4 +17,10 @@ def get_current_floor():
     raise ValueError("Could not determine the current floor")
 
 def go_to_floor(fl:int):
-    pass
+    curr = get_current_floor()
+    if fl < curr:
+        print("Going up")
+        go_down(fl)
+    elif fl > curr:
+        print("Going down")
+        go_up(fl)

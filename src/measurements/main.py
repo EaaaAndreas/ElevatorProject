@@ -29,6 +29,9 @@ def get_floor(etage) -> int:
     # raise error when no data.json file
     return distance
 
+def closest_floor(dist) -> int:
+    floors = floor()
+    return floors
 def calibrate():
     while True:
         etage = input('Skriv etage nr.: ')
