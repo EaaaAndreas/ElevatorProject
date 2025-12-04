@@ -73,6 +73,37 @@ def get_current_floor():
             return fl
     raise ValueError("Could not determine the current floor")
 
+def What_way_to_go(target_floor: str) -> str:
+    floors = floor()
+    if target_floor not in floors:
+        raise  KeyError(f'the target floor {target_floor} is not found in data')
+    
+    cur_disk = measure()
+    target_dist = floors[target_floor]
+    
+    if abs(cur_disk - target_floor <= ACCURACY):
+        return('allready there')
+    elif cur_disk < target_dist:
+        return('up')
+    else:
+        return('down')
+
+def go_to_floor(target_floor: str):
+    directions = What_way_to_go(target_floor)
+    if directions == 'allready there':
+        print(f'the elevator is all ready at {target_floor}')
+    
+    while True:
+        cur_disk = measure()
+        if abs(cur_disk - floor()[target_floor]) <= ACCURACY:
+            print(f'arrived at {target_floor}')
+            break
+        elif directions == 'up':
+            go_up()
+        elif directions == 'down':
+            go_down()
+
+
 if __name__ == '__main__':
     calibrate()
 
