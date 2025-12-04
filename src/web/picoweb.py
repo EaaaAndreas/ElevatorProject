@@ -1,5 +1,6 @@
 """
-pico-web - WiFi connectivity and web interface module for elevator control
+picoweb - WiFi connectivity and web interface module for elevator control
+FIXED VERSION with non-blocking socket
 """
 import network
 import socket
@@ -10,6 +11,7 @@ wlan = None
 server_socket = None
 is_connected = False
 ip_address = None
+AUTOREFRESH = 2 # seconds
 
 # Configuration
 SSID = 'ITEK 1st'
@@ -25,20 +27,20 @@ def init_wifi(ssid=None, password=None):
     Returns: True if connected, False otherwise
     """
     global wlan, is_connected, ip_address, SSID, PASSWORD
-    
+
     if ssid:
         SSID = ssid
     if password:
         PASSWORD = password
-    
+
     print('[WiFi] Initializing...')
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
-    
+
     if not wlan.isconnected():
         print(f'[WiFi] Connecting to {SSID}...')
         wlan.connect(SSID, PASSWORD)
-        
+
         # Wait for connection (10 second timeout)
         max_wait = 10
         while max_wait > 0:
@@ -47,7 +49,7 @@ def init_wifi(ssid=None, password=None):
             max_wait -= 1
             print('[WiFi] Waiting for connection...')
             time.sleep(1)
-    
+
     # Check connection status
     if wlan.status() != 3:
         print('[WiFi] Connection failed!')
@@ -76,22 +78,29 @@ def set_command_callback(callback):
     """
     global command_callback
     name, fn, *values = callback
-    command_callback.update({name: (fn,values)})
-    print('[Web Server] Command callback registered')
+    command_callback.update({name: (fn, values)})
+    print(f'[Web Server] Command callback registered: {name}')
 
 def get_command_callback(name):
+    """Execute a registered callback by name"""
     callback = command_callback.get(name)
-    return callback[0](*callback[1])
+    if callback:
+        return callback[0](*callback[1])
+    else:
+        print(f'[Web Server] Warning: No callback registered for {name}')
 
 def generate_webpage(current_floor="Unknown", status="Ready"):
     """Generate the HTML page with current elevator state"""
+    # Dynamic refresh: faster when moving, slower when idle
+    refresh_rate = 1 if "Moving" in status else AUTOREFRESH
+
     html = f"""<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>Elevator Control</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="refresh" content="5">
+    <meta http-equiv="refresh" content="{refresh_rate}">
     <style>
         body {{
             font-family: Arial, sans-serif;
@@ -184,7 +193,7 @@ def generate_webpage(current_floor="Unknown", status="Ready"):
         
         <button class="emergency" onclick="location.href='/?cmd=stop'">EMERGENCY STOP</button>
         
-        <div class="footer">Auto-refresh: 1s | IP: {ip_address}</div>
+        <div class="footer">Auto-refresh: {refresh_rate}s | IP: {ip_address}</div>
     </div>
 </body>
 </html>"""
@@ -196,18 +205,19 @@ def start_server():
     Call this once during initialization
     """
     global server_socket
-    
+
     if not is_wifi_connected():
         print('[Web Server] Cannot start - not connected to WiFi')
         return False
-    
+
     try:
         addr = socket.getaddrinfo('0.0.0.0', PORT)[0][-1]
         server_socket = socket.socket()
         server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server_socket.bind(addr)
-        server_socket.listen()
-        
+        server_socket.listen(1)  # FIXED: Added parameter
+        server_socket.setblocking(False)  # CRITICAL FIX: Non-blocking mode
+
         print(f'[Web Server] Listening on {ip_address}:{PORT}')
         print(f'[Web Server] Access at: http://{ip_address}')
         return True
@@ -219,69 +229,87 @@ def check_requests(current_floor="Unknown", status="Ready"):
     """
     Check for incoming web requests (non-blocking)
     Call this regularly in your main loop
-    
+
     Args:
         current_floor: Current floor number to display
         status: Status message to display (e.g., "Moving", "Ready", "Stopped")
-    
+
     Returns:
         None
     """
+    if current_floor is None:
+        current_floor = -1
     if not server_socket:
         return
+
     cl = None
     try:
         cl, addr = server_socket.accept()
-        # print(f'[Web Server] Client connected: {addr}')
-        try:
-            request = cl.recv(1024)
-            request_str = str(request)
+        cl.settimeout(2.0)  # 2 second timeout for slow connections
 
-            # Parse the request
-            command_issued = False
-            if '/?floor=1' in request_str:
-                if command_callback:
-                    get_command_callback("goto_1")
-                    print("Commanded to change to floor 1")
-                command_issued = True
-            elif '/?floor=2' in request_str:
-                if command_callback:
-                    get_command_callback('goto_2')
-                    print("Commanded to change to floor 2")
-                command_issued = True
-            elif '/?floor=3' in request_str:
-                if command_callback:
-                    get_command_callback('goto_3')
-                    print("Commanded to change to floor 3")
-                command_issued = True
-            elif '/?floor=4' in request_str:
-                if command_callback:
-                    get_command_callback('goto_4')
-                    print("Commanded to change to floor 4")
-                command_issued = True
-            elif '/?cmd=stop' in request_str:
-                if command_callback:
-                    get_command_callback('stop')
-                command_issued = True
-        except OSError:
-            pass
+        request = cl.recv(1024)
+        request_str = str(request)
+
+        # Parse the request
+        if '/?floor=1' in request_str and current_floor != 1:
+            if command_callback:
+                get_command_callback("goto_1")
+                print("[Web] Command: Go to floor 1")
+        elif '/?floor=2' in request_str and current_floor != 2:
+            if command_callback:
+                get_command_callback('goto_2')
+                print("[Web] Command: Go to floor 2")
+        elif '/?floor=3' in request_str and current_floor != 3:
+            if command_callback:
+                get_command_callback('goto_3')
+                print("[Web] Command: Go to floor 3")
+        elif '/?floor=4' in request_str and current_floor != 4:
+            if command_callback:
+                get_command_callback('goto_4')
+                print("[Web] Command: Go to floor 4")
+        elif '/?cmd=stop' in request_str:
+            if command_callback:
+                get_command_callback('stop')
+                print("[Web] Command: EMERGENCY STOP")
+
         # Generate and send response
         response = generate_webpage(str(current_floor), status)
-        cl.send('HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n')
-        cl.send(response)
-        cl.close()
-        
+        cl.send('HTTP/1.1 200 OK\r\n')
+        cl.send('Content-Type: text/html; charset=UTF-8\r\n')
+        cl.send('Connection: close\r\n\r\n')
+        cl.sendall(response)
+
     except OSError as e:
-        # No incoming connection (non-blocking)
-        if cl:
-            cl.close()
+        # No incoming connection (non-blocking) - this is normal and expected
+        if e.errno not in [11, 110, 128]:  # EAGAIN, ETIMEDOUT, ENOTCONN
+            print(f'[Web Server] OSError: {e}')
     except Exception as e:
-        print(f'[Web Server] Error handling request: {e}')
+        print(f'[Web Server] Unexpected error: {e}')
+        print(f"{e.args}")
+        raise e
+    finally:
+        if cl:
+            try:
+                cl.close()
+            except:
+                pass
+
+def get_server_status():
+    """
+    Returns a dictionary with server status information
+    Useful for debugging
+    """
+    return {
+        'wifi_connected': is_wifi_connected(),
+        'ip_address': ip_address,
+        'server_running': server_socket is not None,
+        'registered_callbacks': list(command_callback.keys())
+    }
 
 def stop_server():
     """Stop the web server and close socket"""
     global server_socket
-    
+
     if server_socket:
         server_socket.close()
         server_socket = None
@@ -290,7 +318,7 @@ def stop_server():
 def disconnect_wifi():
     """Disconnect from WiFi"""
     global wlan, is_connected, ip_address
-    
+
     if wlan:
         wlan.disconnect()
         wlan.active(False)

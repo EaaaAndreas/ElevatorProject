@@ -1,33 +1,25 @@
 # src/motor/movement
 from .motor import *
-from measurements.main import floor
-from main.sevensegment import *
+from measurements.main import what_way_to_go
 
-def get_current_floor():
+def go_to_floor(fl:int, accuracy:int|float):
     """
-    Returns the current floor of the elevator (Only if the elevator is parked at a certain floor).
-    :return:
-    :rtype:
+    Makes the elevator move to the specified floor
+    :param fl: The floor you want to go to
+    :type fl: int
+    :param accuracy: The accuracy, that the floor position is measured with.
+    :type accuracy: int|float
+    :return: None
     """
-    floors = floor()
-    cur_dist = measure()
-    for fl, dist in floors.items():
-        if abs(cur_dist - dist) <= ACCURACY:
-            return fl
-    raise ValueError("Could not determine the current floor")
+    fl = int(fl) if fl else None
+    print("[Motor.Move] Going to floor", fl)
+    directions = what_way_to_go(fl, accuracy)
+    if directions == 'already there':
+        print(f'the elevator is all ready at {fl}')
 
-
-def update_display():
-    curr = get_current_floor()
-    if CURRENT_NUMBER != curr:
-        show_number(curr)
-
-
-def go_to_floor(fl:int):
-    curr = get_current_floor()
-    if fl < curr:
+    if directions == "up":
         print("Going up")
         go_down(fl)
-    elif fl > curr:
+    elif directions == "down":
         print("Going down")
         go_up(fl)

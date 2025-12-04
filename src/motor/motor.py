@@ -1,17 +1,22 @@
 from machine import Pin, PWM
 from time import sleep
 from .tof import measure
-from motor.movement import update_display
+from utils.sevensegment import update_display
+
+__all__ = ["ACCURACY", "motor_forward", "motor_backward", "motor_stop", "move_to", "ramp_up", "ramp_down", "go_up", "go_down"]
+
 UP = 1 # These decide the direction of the motor. Swap them to go the other way.
 DOWN = 2
 
 ACCURACY = 3 # mm - How precise the elevator has to be when parking
-SLOW = 400 # How long before the designated floor does the elevator need to stop slowing down
+SLOW = 100 # How long before the designated floor does the elevator need to stop slowing down
 
 motorUp = Pin(18, Pin.OUT)
 motorDown = Pin(19, Pin.OUT)
 motor_PWM = PWM(Pin(20))
 motor_PWM.freq(5000)
+
+
 duty_step = 10889.33
 
 def motor_forward(speed) -> None:
