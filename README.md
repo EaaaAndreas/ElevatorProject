@@ -1,20 +1,10 @@
+# WE ARE NOW STABLE!
+
 [Google Drive](https://drive.google.com/drive/folders/1Uri08akYiCBdeghpYPs9yWkT8C0TnRwp?usp=drive_link)
 
 
 # Dependencies
-
-# TODOS
-- [x] Make a GitHub Repo
-- [ ] Lern how to use GitHub
-  - Commits
-  - Branches
-
-
-# Requirements
-- ToF
-- Web server
-- H-bro
-  - Kan med fordel styres med **PWM**
+`micropython`
 
 # Intro
 - Der er præsentation fredag, hvor vi skal fortælle hvordan det virker
