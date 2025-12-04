@@ -11,9 +11,9 @@ DOWN = 2
 ACCURACY = 3 # mm - How precise the elevator has to be when parking
 SLOW = 100 # How long before the designated floor does the elevator need to stop slowing down
 
-motorUp = Pin(18, Pin.OUT)
-motorDown = Pin(19, Pin.OUT)
-motor_PWM = PWM(Pin(20))
+motorUp = Pin(5, Pin.OUT)
+motorDown = Pin(4, Pin.OUT)
+motor_PWM = PWM(Pin(3))
 motor_PWM.freq(5000)
 
 
@@ -116,11 +116,11 @@ def go_up(destination:int) -> None:
     while measure() < destination + ACCURACY:
         # Removed redundant assignment of "where_i_am" variable. Moved directly to 'while' statement.
         speed = ramp_up(speed, UP) # Make the motor move
-        update_display()
+        motor_forward(speed)
 
     while measure() < destination:
         speed = ramp_down(speed, DOWN)
-        update_display()
+        motor_forward(speed)
 
 def go_down(destination:int) -> None:
     """
@@ -129,12 +129,14 @@ def go_down(destination:int) -> None:
         :type destination: int
         :return: None
     """
-    speed = 0
+    speed = 32568
     while measure() > destination - ACCURACY:
         speed = ramp_up(speed, DOWN)
-        update_display()
+        motor_backward(speed)
 
     while measure() > destination:
         speed = ramp_down(speed, UP)
-        update_display()
+        motor_backward(speed)
 
+if __name__ == "__main__":
+    go_down()

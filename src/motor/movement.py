@@ -19,7 +19,7 @@ def go_to_floor(fl:int, accuracy:int|float):
 
     if directions == "up":
         print("Going up")
-        go_down(fl)
+        go_up(fl)
     elif directions == "down":
         print("Going down")
-        go_up(fl)
+        go_down(fl)

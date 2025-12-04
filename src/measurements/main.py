@@ -4,11 +4,14 @@ from motor.tof import measure
 
 
 def saving(etage, distance):
-    if os.path.exists("./measurements/data.json"):
-        with open('data.json', "r") as file:
+    try:
+        with open('./measurements/data.json', "r") as file:
             data = json.load(file)
-    else:
-        data = {}
+    except OSError as e:
+        if e.args[0] == 2:
+            data = {}
+        else:
+            raise e
     data.update({etage: distance})
 
     with open('./measurements/data.json', 'w') as f:
@@ -19,21 +22,17 @@ def floor():
         with open("./measurements/data.json", "r") as f:
             data = json.load(f)
             return data
-    except FileNotFoundError:
+    except OSError as e:
         print("No data.json file found yet.")
 
 def get_floor(etage) -> int:
-    try:
-        with open('./measurements/data.json', 'r') as file:
-            data = json.load(file)
+    with open('./measurements/data.json', 'r') as file:
+        data = json.load(file)
 
-        if etage in data:
-            return data[etage]
-        else:
-            raise KeyError(f"Etage {etage} not found in data.json")
-
-    except FileNotFoundError:
-        raise FileNotFoundError("No data.json file found yet.")
+    if etage in data:
+        return data[etage]
+    else:
+        raise KeyError(f"Etage {etage} not found in data.json")
 
 #def closest_floor(dist) -> int:
 #    floors = floor()
@@ -41,13 +40,21 @@ def get_floor(etage) -> int:
 
 def calibrate():
     while True:
-        etage = input('Skriv etage nr.: ')
+        etage = input('Skriv etage nr.: ').strip()
+        try:
+            int(etage)
+        except ValueError:
+            if input("Wish to finish calibration? [y/n]").strip().lower() == "y":
+                print("Updated floors to:")
+                for fl, dist in floor().items():
+                    print(fl, ":", dist)
+                return
         distance = measure()
         saving(etage, distance)
-        print('data saved')
-        print('floor you are on')
-        for etage, distance in floor().items():
-            print(f"{etage}: {distance}")
+        print("Saved data:")
+        print(etage, ":", floor()[etage])
+
+
 
 
 def get_current_floor(accuracy:int|float) -> int|None:

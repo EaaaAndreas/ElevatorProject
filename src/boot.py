@@ -30,6 +30,6 @@ try:
     webrepl.start()
     sleep_ms(500)
     led.on()
+    print("WEBREPL on")
 except:
     pass
-

@@ -1,6 +1,5 @@
 # src/main/sevensegment
 from machine import Pin
-from measurements.main import get_current_floor
 
 CURRENT_NUMBER = None
 

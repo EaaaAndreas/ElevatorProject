@@ -18,27 +18,28 @@ def init():
     while True:
         print("Type 'cal' to calibrate elevator")
         sleep_ms(50)
-        print("Type 'tst' to run test script")
+        print("Leave empty to run elevator")
         sleep_ms(50)
         print("Type 'wrp' to setup webrepl")
         inp = input().strip().lower()
         try:
             if inp == "cal":
-                print("Calibration not implemented yet")
+                calibrate()
             elif inp == "wrp":
                 import webrepl_setup
-            elif inp == "tst":
-                run_test()
             else:
-                print("Invalid input")
+                run()
         finally:
             motor.motor_stop()
             web.stop_server()
             web.disconnect_wifi()
             print("[Test] Test complete")
 
+def calibrate():
+    mes.calibrate()
 
-def run_test():
+
+def run():
     """Main test loop"""
     global CURRENT_FLOOR, TARGET_FLOOR, ELEVATOR_STATUS, IS_MOVING
 
@@ -80,7 +81,7 @@ def run_test():
             sensor_floor = mes.get_current_floor(ACCURACY)
             if sensor_floor != CURRENT_FLOOR:
                 CURRENT_FLOOR = sensor_floor
-                print(f"[Test] Floor changed: Now at floor {CURRENT_FLOOR}")
+                print(f"[Test] Floor changed: Now at floor {CURRENT_FLOOR} | dist: {mes.measure()}")
 
             # 2. Check for web requests
             web.check_requests(CURRENT_FLOOR, ELEVATOR_STATUS)
@@ -119,5 +120,5 @@ def run_test():
 
     except KeyboardInterrupt:
         print("\n[Test] Stopping test...")
-
+print("Running init")
 init()
