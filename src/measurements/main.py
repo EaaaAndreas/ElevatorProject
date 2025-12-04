@@ -1,14 +1,7 @@
-import random
 import json
 import os
-from motor import *
 from motor.tof import measure
 
-ACCURACY = 3
-# TODO: We have to add a 'what way to go' function to tell the `go_to_floor` function what to do.
-#   The `get_current_floor` function is inadequate if the elevator is not parked at a certain floor.
-#   The function has to either completely replace `get_current_floor` or be added to `go_to_floor`, along with a test
-#   for if `get_current_floor` returns `None`
 
 def saving(etage, distance):
     if os.path.exists("./measurements/data.json"):
@@ -42,9 +35,9 @@ def get_floor(etage) -> int:
     except FileNotFoundError:
         raise FileNotFoundError("No data.json file found yet.")
 
-def closest_floor(dist) -> int:
-    floors = floor()
-    return floors
+#def closest_floor(dist) -> int:
+#    floors = floor()
+#    return floors
 
 def calibrate():
     while True:
@@ -57,34 +50,31 @@ def calibrate():
             print(f"{etage}: {distance}")
 
 
-def get_current_floor():
+def get_current_floor(accuracy:int|float) -> int|None:
     """
     Returns the current floor of the elevator (Only if the elevator is parked at a certain floor).
-    :return:
-    :rtype:
+    :return: The floor that the elevator is parked at. None if not within accuracy
+    :rtype: int|None
     """
-    print("Getting all floors")
     floors = floor()
-    print("Getting distance")
     cur_dist = measure()
-    print("Comparing")
     for fl, dist in floors.items():
-        if abs(cur_dist - dist) <= ACCURACY:
-            return fl
-    raise ValueError("Could not determine the current floor")
+        if abs(cur_dist - dist) <= accuracy:
+            return int(fl)
+    return None
 
-def what_way_to_go(target_floor: str|int) -> str:
+def what_way_to_go(target_floor: int|str, accuracy: int|float) -> str:
     target_floor = str(target_floor)
     floors = floor()
     if target_floor not in floors:
         raise  KeyError(f'the target floor {target_floor} is not found in data')
     
-    cur_disk = measure()
+    cur_dist = measure()
     target_dist = floors[target_floor]
     
-    if abs(cur_disk - target_floor <= ACCURACY):
+    if abs(cur_dist - target_dist <= accuracy):
         return 'already there'
-    elif cur_disk < target_dist:
+    elif cur_dist < target_dist:
         return 'up'
     else:
         return 'down'

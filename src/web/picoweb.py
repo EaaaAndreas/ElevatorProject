@@ -237,6 +237,8 @@ def check_requests(current_floor="Unknown", status="Ready"):
     Returns:
         None
     """
+    if current_floor is None:
+        current_floor = -1
     if not server_socket:
         return
 
@@ -283,6 +285,8 @@ def check_requests(current_floor="Unknown", status="Ready"):
             print(f'[Web Server] OSError: {e}')
     except Exception as e:
         print(f'[Web Server] Unexpected error: {e}')
+        print(f"{e.args}")
+        raise e
     finally:
         if cl:
             try:

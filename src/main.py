@@ -1,70 +1,61 @@
 # src/main
+import measurements
+import measurements as mes
+import motor
+import utils
+import web
 from time import sleep_ms
+import gc
 
-from motor import go_to_floor
-from web.main import create_server
-from web.picoweb import check_requests, stop_server, disconnect_wifi
-from utils.sevensegment import update_display
+ACCURACY = 3 # mm
 
-current_floor = 1
+CURRENT_FLOOR = measurements.get_current_floor(ACCURACY)
+TARGET_FLOOR = CURRENT_FLOOR
+ELEVATOR_STATUS = "Ready"
+IS_MOVING = False
+
 def init():
     while True:
-        print("Type 'run' to run elevator program")
-        sleep_ms(50)
         print("Type 'cal' to calibrate elevator")
+        sleep_ms(50)
+        print("Type 'tst' to run test script")
         sleep_ms(50)
         print("Type 'wrp' to setup webrepl")
         inp = input().strip().lower()
-
-        if inp == "run":
-            return run_elevator()
-        elif inp == "cal":
-            print("Calibration not implemented yet")
-        elif inp == "wrp":
-            import webrepl_setup
-        else:
-            print("Invalid input")
-
-# TODO: Make work with motor
-def run_elevator():
-    sleep_ms(50)
-    print("Updating display")
-    update_display()
-    print("Starting loop")
-    while True:
-        print("What floor?")
-        inp = int(input().strip())
-        if 0 < inp <= 4:
-            go_to_floor(inp)
-        else:
-            print("Floor", inp, "does not exist.")
-    """create_server()
-    try:
-        while True:
-            check_requests(current_floor)
-    finally:
-        stop_server()
-        disconnect_wifi()"""
+        try:
+            if inp == "cal":
+                print("Calibration not implemented yet")
+            elif inp == "wrp":
+                import webrepl_setup
+            elif inp == "tst":
+                run_test()
+            else:
+                print("Invalid input")
+        finally:
+            motor.motor_stop()
+            web.stop_server()
+            web.disconnect_wifi()
+            print("[Test] Test complete")
 
 
 def run_test():
     """Main test loop"""
-    global current_floor, target_floor, elevator_status, is_moving
+    global CURRENT_FLOOR, TARGET_FLOOR, ELEVATOR_STATUS, IS_MOVING
 
     print("\n" + "=" * 50)
     print("ELEVATOR TEST MODE - Simulated Hardware")
     print("=" * 50)
 
     # Initialize WiFi
-    if init_wifi():
+    if web.init_wifi():
         print(f"[Test] WiFi connected successfully")
 
         # Register callbacks
-        register_web_callbacks()
+        web.register_web_callbacks(ACCURACY)
 
         # Start web server
-        if start_server():
-            status = get_server_status()
+        if web.start_server():
+            status = web.get_server_status()
             print(f"[Test] Web interface: http://{status['ip_address']}")
             print("[Test] Open this in your browser to test!")
         else:
@@ -81,35 +72,37 @@ def run_test():
     loop_counter = 0
     gc_counter = 0
 
+
+    # ====== Main Loop ======
     try:
         while True:
             # 1. Read current floor from mock sensor
-            sensor_floor = get_current_floor()
-            if sensor_floor != current_floor:
-                current_floor = sensor_floor
-                print(f"[Test] Floor changed: Now at floor {current_floor}")
+            sensor_floor = mes.get_current_floor(ACCURACY)
+            if sensor_floor != CURRENT_FLOOR:
+                CURRENT_FLOOR = sensor_floor
+                print(f"[Test] Floor changed: Now at floor {CURRENT_FLOOR}")
 
             # 2. Check for web requests
-            check_requests(current_floor, elevator_status)
+            web.check_requests(CURRENT_FLOOR, ELEVATOR_STATUS)
 
             # 3. Handle simulated movement
-            if is_moving and target_floor != current_floor:
-                print(f"[Test] Simulating movement to floor {target_floor}...")
-                go_to_floor(target_floor)
+            if IS_MOVING and TARGET_FLOOR != CURRENT_FLOOR:
+                print(f"[Test] Simulating movement to floor {TARGET_FLOOR}...")
+                motor.go_to_floor(TARGET_FLOOR, ACCURACY)
 
                 # Update status after movement
-                is_moving = False
-                elevator_status = "Ready"
-                current_floor = get_current_floor()
-                print(f"[Test] Arrived at floor {current_floor}")
+                IS_MOVING = False
+                ELEVATOR_STATUS = "Ready"
+                CURRENT_FLOOR = mes.get_current_floor(ACCURACY)
+                print(f"[Test] Arrived at floor {CURRENT_FLOOR}")
 
-            elif is_moving and target_floor == current_floor:
-                is_moving = False
-                elevator_status = "Ready"
-                print(f"[Test] Already at floor {target_floor}")
+            elif IS_MOVING and TARGET_FLOOR == CURRENT_FLOOR:
+                IS_MOVING = False
+                ELEVATOR_STATUS = "Ready"
+                print(f"[Test] Already at floor {TARGET_FLOOR}")
 
             # 4. Update mock display
-            update_display()
+            utils.update_display(CURRENT_FLOOR)
 
             # 5. Garbage collection
             gc_counter += 1
@@ -119,16 +112,12 @@ def run_test():
 
             # 6. Status print
             if loop_counter % 50 == 0:
-                print(f"[Status] Floor: {current_floor} | Target: {target_floor} | Status: {elevator_status}")
+                print(f"[Status] Floor: {CURRENT_FLOOR} | Target: {TARGET_FLOOR} | Status: {ELEVATOR_STATUS} | Distance: {mes.measure()}")
 
             loop_counter += 1
             sleep_ms(50)
 
     except KeyboardInterrupt:
         print("\n[Test] Stopping test...")
-    finally:
-        motor_stop()
-        stop_server()
-        disconnect_wifi()
-        print("[Test] Test complete")
+
 init()
