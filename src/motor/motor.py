@@ -11,15 +11,11 @@ DOWN = 2
 ACCURACY = 3 # mm - How precise the elevator has to be when parking
 SLOW = 100 # How long before the designated floor does the elevator need to stop slowing down
 
-#motorUp = Pin(18, Pin.OUT)
-#motorDown = Pin(19, Pin.OUT)
-#motor_PWM = PWM(Pin(20))
-#motor_PWM.freq(5000)
-from tests.hardware import Motor, MotorPWM
-from .tof import gy53
-motorUp = Motor(gy53, 1)
-motorDown = Motor(gy53, -1)
-motor_PWM = MotorPWM()
+motorUp = Pin(18, Pin.OUT)
+motorDown = Pin(19, Pin.OUT)
+motor_PWM = PWM(Pin(20))
+motor_PWM.freq(5000)
+
 
 duty_step = 10889.33
 

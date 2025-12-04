@@ -51,10 +51,7 @@ def clear_display():
         pin.off()
 
 
-def update_display():
-    print("Updating display...")
-    curr = get_current_floor()
-    print(curr)
-    if CURRENT_NUMBER != curr:
-        show_number(curr)
-        print(curr)
+def update_display(current_floor):
+    if current_floor and CURRENT_NUMBER != current_floor:
+        show_number(current_floor)
+        print("Displaying:",current_floor)

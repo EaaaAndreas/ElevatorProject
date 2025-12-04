@@ -11,7 +11,7 @@ print("Initializing...")
 #Connect to WiFi
 try:
     timer = ticks_ms()
-    while not init_wifi("HoloNet", "C-3PO_BabyYoda") and ticks_diff(timer, ticks_ms()) < 3.e4:
+    while not init_wifi() and ticks_diff(timer, ticks_ms()) < 3.e4:
         led.toggle()
         sleep(5)
 except OSError:
