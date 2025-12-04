@@ -87,12 +87,14 @@ def run():
             web.check_requests(CURRENT_FLOOR, ELEVATOR_STATUS)
 
             # 3. Handle simulated movement
-            if IS_MOVING and TARGET_FLOOR != CURRENT_FLOOR:
+            if not IS_MOVING and TARGET_FLOOR != CURRENT_FLOOR:
+                # TODO: Jeg har forsøgt at fixe dér, hvor chatten sagde at vi ikke opdaterer ELEVATOR_STATUS. Men ved
+                #   ikke om det virker.
                 print(f"[Test] Simulating movement to floor {TARGET_FLOOR}...")
                 motor.go_to_floor(TARGET_FLOOR, ACCURACY)
 
                 # Update status after movement
-                IS_MOVING = False
+                IS_MOVING = True
                 ELEVATOR_STATUS = "Ready"
                 CURRENT_FLOOR = mes.get_current_floor(ACCURACY)
                 print(f"[Test] Arrived at floor {CURRENT_FLOOR}")

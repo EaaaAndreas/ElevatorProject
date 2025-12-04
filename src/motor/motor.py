@@ -11,8 +11,8 @@ DOWN = 2
 ACCURACY = 3 # mm - How precise the elevator has to be when parking
 SLOW = 100 # How long before the designated floor does the elevator need to stop slowing down
 
-motorUp = Pin(5, Pin.OUT)
-motorDown = Pin(4, Pin.OUT)
+motorUp = Pin(19, Pin.OUT)
+motorDown = Pin(20, Pin.OUT)
 motor_PWM = PWM(Pin(3))
 motor_PWM.freq(5000)
 
@@ -71,11 +71,11 @@ def move_to(destination) -> None:
         
 def ramp_up(speed:int, direction:int) -> int:
     if direction == 1:
-        if speed > 65336:
+        if speed < 65336:
             sleep(0.005)
             speed += duty_step
     elif direction == 2:
-        if speed > 65336:
+        if speed < 65336:
             sleep(0.005)
             speed += duty_step
     else:
@@ -94,47 +94,47 @@ def ramp_down(speed:int, direction:int) -> int:
     :rtype: int
     """
     if direction == 1:
-        if speed < 65336:
+        if speed > 0:
             sleep(0.005)  
             speed += duty_step
     elif direction == 2:
-        if speed < 65336:
+        if speed > 0:
             sleep(0.005) 
             speed += duty_step
     else:
         raise ValueError("direction must be 1 or 2")
     return speed # The speed will stay constant if max speed is reached
     
-def go_up(destination:int) -> None:
+def go_up(to_distance:int|float) -> None:
     """
     Makes the elevator go UP to a specified floor
-    :param destination: Where the elevator needs to go
-    :type destination: int
+    :param to_distance: Where the elevator needs to go
+    :type to_distance: int
     :return: None
     """
     speed = 0
-    while measure() < destination + ACCURACY:
+    while measure() < to_distance + ACCURACY:
         # Removed redundant assignment of "where_i_am" variable. Moved directly to 'while' statement.
         speed = ramp_up(speed, UP) # Make the motor move
         motor_forward(speed)
 
-    while measure() < destination:
+    while measure() < to_distance:
         speed = ramp_down(speed, DOWN)
         motor_forward(speed)
 
-def go_down(destination:int) -> None:
+def go_down(to_distance:int) -> None:
     """
         Makes the elevator go DOWN to a specified floor
-        :param destination: Where the elevator needs to go
-        :type destination: int
+        :param to_distance: Where the elevator needs to go
+        :type to_distance: int
         :return: None
     """
     speed = 32568
-    while measure() > destination - ACCURACY:
+    while measure() > to_distance - ACCURACY:
         speed = ramp_up(speed, DOWN)
         motor_backward(speed)
 
-    while measure() > destination:
+    while measure() > to_distance:
         speed = ramp_down(speed, UP)
         motor_backward(speed)
 
