@@ -26,6 +26,7 @@ def floor():
         print("No data.json file found yet.")
 
 def get_floor(etage) -> int:
+    etage = str(etage)
     with open('./measurements/data.json', 'r') as file:
         data = json.load(file)
 

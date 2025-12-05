@@ -19,7 +19,7 @@ motor_PWM.freq(5000)
 
 duty_step = 10889.33
 
-def motor_forward(speed) -> None:
+def motor_forward(speed:int) -> None:
     """
         Sets the speed of the motor in the forward direction.
         :param speed: The PWM duty cycle determining the speed of the motor
@@ -28,10 +28,10 @@ def motor_forward(speed) -> None:
     """
     motorUp.on()
     motorDown.off()
-    motor_PWM.duty_u16(speed)
+    motor_PWM.duty_u16(int(speed))
     
     
-def motor_backward(speed) -> None:
+def motor_backward(speed:int) -> None:
     """
         Sets the speed of the motor in the reverse direction.
         :param speed: The PWM duty cycle determining the speed of the motor
@@ -40,7 +40,7 @@ def motor_backward(speed) -> None:
     """
     motorUp.off()
     motorDown.on()
-    motor_PWM.duty_u16(speed)
+    motor_PWM.duty_u16(int(speed))
 
 
 def motor_stop() -> None:
@@ -113,6 +113,7 @@ def go_up(to_distance:int|float) -> None:
     :return: None
     """
     speed = 0
+    print("Motor going up to", to_distance)
     while measure() < to_distance + ACCURACY:
         # Removed redundant assignment of "where_i_am" variable. Moved directly to 'while' statement.
         speed = ramp_up(speed, UP) # Make the motor move
@@ -129,6 +130,7 @@ def go_down(to_distance:int) -> None:
         :type to_distance: int
         :return: None
     """
+    print("Motor going down to", to_distance)
     speed = 32568
     while measure() > to_distance - ACCURACY:
         speed = ramp_up(speed, DOWN)

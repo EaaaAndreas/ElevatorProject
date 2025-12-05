@@ -90,19 +90,19 @@ def run():
             if not IS_MOVING and TARGET_FLOOR != CURRENT_FLOOR:
                 # TODO: Jeg har forsøgt at fixe dér, hvor chatten sagde at vi ikke opdaterer ELEVATOR_STATUS. Men ved
                 #   ikke om det virker.
-                print(f"[Test] Simulating movement to floor {TARGET_FLOOR}...")
+                print(f"[Run] Move to floor {TARGET_FLOOR}...")
                 motor.go_to_floor(TARGET_FLOOR, ACCURACY)
 
                 # Update status after movement
                 IS_MOVING = True
                 ELEVATOR_STATUS = "Ready"
                 CURRENT_FLOOR = mes.get_current_floor(ACCURACY)
-                print(f"[Test] Arrived at floor {CURRENT_FLOOR}")
+                print(f"[Run] Arrived at floor {CURRENT_FLOOR}")
 
             elif IS_MOVING and TARGET_FLOOR == CURRENT_FLOOR:
                 IS_MOVING = False
                 ELEVATOR_STATUS = "Ready"
-                print(f"[Test] Already at floor {TARGET_FLOOR}")
+                print(f"[Run] Already at floor {TARGET_FLOOR}")
 
             # 4. Update mock display
             utils.update_display(CURRENT_FLOOR)
